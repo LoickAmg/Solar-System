@@ -1,395 +1,197 @@
 import './style.css'
+import * as THREE from 'three'
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
 const planets = [
-  {
-    id: 'mercury', name: 'Mercure', type: 'Planète tellurique', color: '#9b9da4', accent: '#d8d9de',
-    radius: 4, orbit: 0.12, period: 0.24, temperature: '167 °C', distance: '57,9 M km', moons: '0',
-    description: 'Un petit monde rocheux, brûlé par le Soleil le jour et glacé dans sa nuit permanente.',
-  },
-  {
-    id: 'venus', name: 'Vénus', type: 'Planète tellurique', color: '#d5a35f', accent: '#f4d6a0',
-    radius: 7, orbit: 0.18, period: 0.62, temperature: '464 °C', distance: '108,2 M km', moons: '0',
-    description: 'Une atmosphère dense et opaque enveloppe le monde le plus chaud de notre voisinage.',
-  },
-  {
-    id: 'earth', name: 'Terre', type: 'Planète tellurique', color: '#277bb7', accent: '#8fc8d3',
-    radius: 8, orbit: 0.25, period: 1, temperature: '15 °C', distance: '149,6 M km', moons: '1',
-    description: 'Notre planète océan, la seule connue à abriter une biosphère riche et diversifiée.',
-  },
-  {
-    id: 'mars', name: 'Mars', type: 'Planète tellurique', color: '#b55e45', accent: '#e9a57f',
-    radius: 6, orbit: 0.32, period: 1.88, temperature: '-63 °C', distance: '227,9 M km', moons: '2',
-    description: 'Le désert rouge conserve les traces d’une histoire géologique et hydrologique fascinante.',
-  },
-  {
-    id: 'jupiter', name: 'Jupiter', type: 'Géante gazeuse', color: '#bc906a', accent: '#f3d7b0',
-    radius: 16, orbit: 0.45, period: 11.86, temperature: '-110 °C', distance: '778,5 M km', moons: '95',
-    description: 'Le géant du système, reconnaissable à ses bandes nuageuses et à sa Grande Tache rouge.',
-  },
-  {
-    id: 'saturn', name: 'Saturne', type: 'Géante gazeuse', color: '#d0b47b', accent: '#f1dbad',
-    radius: 14, orbit: 0.58, period: 29.45, temperature: '-140 °C', distance: '1,43 Md km', moons: '146',
-    description: 'Un monde pâle entouré du système d’anneaux le plus spectaculaire observé depuis la Terre.',
-  },
-  {
-    id: 'uranus', name: 'Uranus', type: 'Géante de glace', color: '#77b8c0', accent: '#c3f0ec',
-    radius: 10, orbit: 0.70, period: 84, temperature: '-195 °C', distance: '2,87 Md km', moons: '28',
-    description: 'Une géante bleu-vert qui roule presque sur le côté, comme un monde posé sur son orbite.',
-  },
-  {
-    id: 'neptune', name: 'Neptune', type: 'Géante de glace', color: '#3d63b5', accent: '#9eb8ff',
-    radius: 10, orbit: 0.82, period: 164.8, temperature: '-200 °C', distance: '4,50 Md km', moons: '16',
-    description: 'La frontière bleue du système solaire, balayée par les vents les plus rapides connus.',
-  },
+  { id:'mercury', name:'Mercure', type:'Tellurique', diameter:4879, distance:0.39, color:0x9b9da4, accent:'#bfc4cb', moons:[], description:'Le plus petit monde et le plus proche du Soleil. Sa surface cratérisée connaît des écarts thermiques extrêmes.' },
+  { id:'venus', name:'Vénus', type:'Tellurique', diameter:12104, distance:0.72, color:0xd5a35f, accent:'#f4d6a0', moons:[], description:'Une planète jumelle de la Terre par sa taille, mais enveloppée d’une atmosphère dense et brûlante.' },
+  { id:'earth', name:'Terre', type:'Tellurique', diameter:12756, distance:1, color:0x277bb7, accent:'#8fc8d3', moons:['Lune'], description:'Notre planète océan, seule planète connue à abriter une biosphère riche et diversifiée.' },
+  { id:'mars', name:'Mars', type:'Tellurique', diameter:6792, distance:1.52, color:0xb55e45, accent:'#e9a57f', moons:['Phobos','Déimos'], description:'Le désert rouge conserve les traces d’une histoire géologique et hydrologique fascinante.' },
+  { id:'jupiter', name:'Jupiter', type:'Géante gazeuse', diameter:142984, distance:5.2, color:0xbc906a, accent:'#f3d7b0', moons:['Io','Europe','Ganymède','Callisto'], description:'Le géant du système solaire. Ses quatre lunes galiléennes forment un mini-système fascinant.' },
+  { id:'saturn', name:'Saturne', type:'Géante gazeuse', diameter:120536, distance:9.54, color:0xd0b47b, accent:'#f1dbad', moons:['Titan','Rhéa','Japet','Dioné','Encelade'], description:'Un monde pâle entouré d’anneaux glacés et d’une famille de lunes remarquables.' },
+  { id:'uranus', name:'Uranus', type:'Géante de glace', diameter:51118, distance:19.19, color:0x77b8c0, accent:'#c3f0ec', moons:['Titania','Obéron','Ariel','Umbriel','Miranda'], description:'Une géante bleu-vert qui tourne presque sur le côté, avec un système d’anneaux discret.' },
+  { id:'neptune', name:'Neptune', type:'Géante de glace', diameter:49528, distance:30.07, color:0x3d63b5, accent:'#9eb8ff', moons:['Triton','Néréide','Protée'], description:'La frontière bleue du système solaire, balayée par des vents supersoniques.' },
 ]
 
 const app = document.querySelector('#app')
-
 app.innerHTML = `
   <div class="shell">
-    <header class="topbar">
-      <a class="wordmark" href="#top" aria-label="Solar System — accueil">
-        <span class="wordmark-mark" aria-hidden="true"><i></i><i></i><i></i></span>
-        <span><strong>SOLAR</strong><small>SYSTEM</small></span>
-      </a>
-      <div class="topbar-meta">
-        <span class="signal-dot"></span>
-        <span>Session d’observation active</span>
-        <span class="topbar-divider"></span>
-        <span class="mono">OBS-08 / 2025</span>
-      </div>
-    </header>
-
+    <header class="topbar"><a class="wordmark" href="#top"><span class="mark"><i></i></span><span><strong>SOLAR</strong><small>SYSTEM / FIELD NOTES</small></span></a><div class="status"><span></span> VISUALISATION 3D <b>·</b> OBS-09</div></header>
     <main id="top">
-      <section class="intro">
-        <div>
-          <p class="kicker"><span class="kicker-line"></span> Observatoire orbital</p>
-          <h1>Notre voisinage,<br><em>à portée de regard.</em></h1>
-        </div>
-        <div class="intro-copy">
-          <p>Une carte interactive pour parcourir les huit mondes qui gravitent autour de notre étoile.</p>
-          <span class="intro-note">Échelle visuelle amplifiée · distances non proportionnelles</span>
-        </div>
+      <section class="hero"><div><p class="kicker">Observatoire orbital <span></span></p><h1>Voir les mondes<br><em>prendre forme.</em></h1></div><div class="hero-copy"><p>Une maquette interactive pour comprendre les proportions, les distances et les familles de notre voisinage cosmique.</p><small>Modèle pédagogique · dimensions et distances compressées pour rester lisibles</small></div></section>
+      <section class="workspace">
+        <div class="scene-card"><div class="scene-head"><div><label>01 / Navigation spatiale</label><h2>Carte 3D du système solaire</h2></div><div class="scene-tools"><button id="view-system" class="tool-button active" type="button">Système</button><button id="view-selected" class="tool-button" type="button">Focus sélection</button></div></div><div id="scene" class="scene"><div class="scene-overlay"><span class="axis">Y ↑</span><span class="hint">Glisser pour orbiter · molette pour zoomer</span></div></div><div class="scene-foot"><button id="pause" class="primary-button" type="button">Ⅱ <span>Pause</span></button><label class="range-label">Vitesse <input id="speed" type="range" min="0" max="2" step="0.1" value="0.6"><b id="speed-value">0,6×</b></label><button id="reset-camera" class="link-button" type="button">Réinitialiser la vue</button></div></div>
+        <aside class="inspector"><label>02 / Fiche d’observation</label><div id="swatch" class="swatch"></div><p id="type" class="planet-type">Tellurique</p><h2 id="name">Terre</h2><p id="description" class="description"></p><div class="facts"><div><small>Diamètre équatorial</small><strong id="diameter"></strong></div><div><small>Distance moyenne</small><strong id="distance"></strong></div><div><small>Comparée à la Terre</small><strong id="earth-ratio"></strong></div><div><small>Lunes principales</small><strong id="moon-count"></strong></div></div><div class="moons"><small>Lunes à observer</small><div id="moon-list"></div></div><div class="record"><span></span><code id="record-id">EARTH / TERRE</code></div></aside>
       </section>
-
-      <section class="workspace" aria-label="Exploration interactive du système solaire">
-        <div class="stage-card">
-          <div class="stage-head">
-            <div>
-              <span class="section-label">01 / Carte orbitale</span>
-              <h2>Le système intérieur</h2>
-            </div>
-            <span class="live-chip"><span></span> Simulation en direct</span>
-          </div>
-          <div class="canvas-wrap">
-            <canvas id="solar-canvas" aria-label="Carte animée du système solaire, cliquez sur une planète pour la sélectionner"></canvas>
-            <div class="canvas-hint"><span class="mouse-icon">⌖</span> Cliquez sur un monde pour l’inspecter</div>
-            <div class="north-mark">N<br><span>↑</span></div>
-          </div>
-          <div class="control-bar">
-            <button id="play-toggle" class="play-button" type="button" aria-label="Mettre la simulation en pause"><span class="play-icon">Ⅱ</span><span id="play-label">Pause</span></button>
-            <div class="speed-control">
-              <label for="speed">Vitesse de simulation</label>
-              <input id="speed" type="range" min="0.25" max="4" value="1" step="0.25">
-              <span id="speed-value" class="mono">1×</span>
-            </div>
-            <button id="reset" class="text-button" type="button">Réinitialiser</button>
-            <label class="switch-label"><input id="labels-toggle" type="checkbox" checked><span class="switch"></span><span>Étiquettes</span></label>
-          </div>
-        </div>
-
-        <aside class="inspector" aria-live="polite">
-          <div class="inspector-head"><span class="section-label">02 / Fiche d’observation</span><span class="record-dot">REC</span></div>
-          <div id="planet-swatch" class="planet-swatch" aria-hidden="true"><span></span></div>
-          <p id="planet-type" class="planet-type">Planète tellurique</p>
-          <h2 id="planet-name">Terre</h2>
-          <p id="planet-description" class="planet-description">Notre planète océan, la seule connue à abriter une biosphère riche et diversifiée.</p>
-          <div class="stats-grid">
-            <div class="stat"><span>Distance au Soleil</span><strong id="planet-distance">149,6 M km</strong></div>
-            <div class="stat"><span>Température moyenne</span><strong id="planet-temperature">15 °C</strong></div>
-            <div class="stat"><span>Satellites naturels</span><strong id="planet-moons">1</strong></div>
-            <div class="stat"><span>Position orbitale</span><strong id="planet-position">03 / 08</strong></div>
-          </div>
-          <div class="inspector-footer"><span class="footer-rule"></span><span id="planet-id" class="mono">EARTH / TERRE</span><span class="footer-rule"></span></div>
-        </aside>
-      </section>
-
-      <section class="planet-index">
-        <div class="index-heading"><span class="section-label">03 / Index des mondes</span><span class="index-note">Sélectionnez une destination</span></div>
-        <div id="planet-buttons" class="planet-buttons"></div>
-      </section>
+      <section class="comparison"><div class="section-head"><div><label>03 / Comparateur pédagogique</label><h2>Les proportions, autrement.</h2></div><div class="compare-switch"><button data-mode="size" class="compare-button active" type="button">Taille</button><button data-mode="distance" class="compare-button" type="button">Distance</button></div></div><p class="comparison-intro">Les valeurs réelles sont conservées dans les fiches. Les barres utilisent une échelle logarithmique pour rendre visibles les écarts entre Mercure, la Terre et les géantes.</p><div id="bars" class="bars"></div></section>
     </main>
-
-    <footer class="footer"><span>Solar System / Archive d’observation</span><span class="mono">DONNÉES PÉDAGOGIQUES · 01</span><span>Interface conçue pour apprendre en mouvement.</span></footer>
+    <footer><span>Solar System / Field Notes</span><span>Données de référence : NASA Science</span><span class="mono">BUILD 02 · THREE.JS</span></footer>
   </div>
 `
 
-const canvas = document.querySelector('#solar-canvas')
-const context = canvas.getContext('2d')
-const playToggle = document.querySelector('#play-toggle')
-const playLabel = document.querySelector('#play-label')
-const speedInput = document.querySelector('#speed')
-const speedValue = document.querySelector('#speed-value')
-const labelsToggle = document.querySelector('#labels-toggle')
-const planetButtons = document.querySelector('#planet-buttons')
-const defaultPlanet = planets.find((planet) => planet.id === 'earth')
-
-let selectedPlanet = defaultPlanet
+let selected = planets[2]
 let paused = false
-let speed = 1
-let elapsed = 0
-let lastFrame = performance.now()
-let hoveredPlanet = null
-let planetPositions = []
-let stars = []
+let speed = 0.6
+let compareMode = 'size'
 
-function createStars(width, height) {
-  let seed = 8247
-  const random = () => {
-    seed = (seed * 16807) % 2147483647
-    return (seed - 1) / 2147483646
-  }
-  return Array.from({ length: Math.max(100, Math.floor(width * height / 5500)) }, () => ({
-    x: random() * width,
-    y: random() * height,
-    radius: random() * 1.35 + 0.2,
-    alpha: random() * 0.6 + 0.16,
-  }))
+const sceneHost = document.querySelector('#scene')
+const scene = new THREE.Scene()
+scene.background = new THREE.Color(0x08111f)
+const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 1000)
+camera.position.set(0, 30, 40)
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false })
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+renderer.setSize(sceneHost.clientWidth, sceneHost.clientHeight)
+renderer.outputColorSpace = THREE.SRGBColorSpace
+sceneHost.prepend(renderer.domElement)
+const controls = new OrbitControls(camera, renderer.domElement)
+controls.enableDamping = true
+controls.minDistance = 9
+controls.maxDistance = 80
+controls.target.set(0, 0, 0)
+scene.add(new THREE.AmbientLight(0x8098b7, 0.72))
+const sunLight = new THREE.PointLight(0xffc16b, 3.5, 90)
+sunLight.position.set(0, 0, 0)
+scene.add(sunLight)
+
+const starGeometry = new THREE.BufferGeometry()
+const starPositions = []
+for (let i = 0; i < 850; i += 1) {
+  const radius = 90 + Math.random() * 80
+  const theta = Math.random() * Math.PI * 2
+  const phi = Math.acos(2 * Math.random() - 1)
+  starPositions.push(radius * Math.sin(phi) * Math.cos(theta), radius * Math.cos(phi), radius * Math.sin(phi) * Math.sin(theta))
 }
+starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starPositions, 3))
+scene.add(new THREE.Points(starGeometry, new THREE.PointsMaterial({ color: 0xb9cbe0, size: 0.22, transparent: true, opacity: 0.72 })))
 
-function resizeCanvas() {
-  const rect = canvas.getBoundingClientRect()
-  const ratio = Math.min(window.devicePixelRatio || 1, 2)
-  canvas.width = Math.floor(rect.width * ratio)
-  canvas.height = Math.floor(rect.height * ratio)
-  context.setTransform(ratio, 0, 0, ratio, 0, 0)
-  stars = createStars(rect.width, rect.height)
-}
+const sun = new THREE.Mesh(new THREE.SphereGeometry(2.15, 40, 40), new THREE.MeshBasicMaterial({ color: 0xffbd58 }))
+scene.add(sun)
+const sunGlow = new THREE.Mesh(new THREE.SphereGeometry(2.7, 32, 32), new THREE.MeshBasicMaterial({ color: 0xff9d3d, transparent: true, opacity: 0.1, side: THREE.BackSide }))
+scene.add(sunGlow)
+const planetObjects = []
+const orbitGroups = []
+const distanceScale = (distance) => 4.8 + Math.log(distance + 1) * 5.8
+const visualRadius = (diameter) => 0.34 + Math.pow(diameter / 12756, 0.43) * 0.52
 
-function drawGlow(x, y, radius, color) {
-  const glow = context.createRadialGradient(x, y, 0, x, y, radius)
-  glow.addColorStop(0, `${color}aa`)
-  glow.addColorStop(0.35, `${color}20`)
-  glow.addColorStop(1, `${color}00`)
-  context.fillStyle = glow
-  context.beginPath()
-  context.arc(x, y, radius, 0, Math.PI * 2)
-  context.fill()
-}
-
-function drawPlanet(planet, x, y, radius, isSelected) {
+planets.forEach((planet, index) => {
+  const orbitRadius = distanceScale(planet.distance)
+  const orbit = new THREE.Mesh(new THREE.RingGeometry(orbitRadius - 0.012, orbitRadius + 0.012, 128), new THREE.MeshBasicMaterial({ color: 0x93aeca, transparent: true, opacity: 0.16, side: THREE.DoubleSide }))
+  orbit.rotation.x = Math.PI / 2
+  scene.add(orbit)
+  const group = new THREE.Group()
+  const radius = visualRadius(planet.diameter)
+  const mesh = new THREE.Mesh(new THREE.SphereGeometry(radius, 32, 24), new THREE.MeshStandardMaterial({ color: planet.color, roughness: 0.75, metalness: 0.02 }))
+  mesh.userData.planet = planet
+  mesh.position.x = orbitRadius
+  group.add(mesh)
   if (planet.id === 'saturn') {
-    context.save()
-    context.translate(x, y)
-    context.rotate(-0.18)
-    context.strokeStyle = `${planet.accent}aa`
-    context.lineWidth = 2
-    context.beginPath()
-    context.ellipse(0, 0, radius * 1.85, radius * 0.55, 0, 0, Math.PI * 2)
-    context.stroke()
-    context.strokeStyle = `${planet.accent}42`
-    context.lineWidth = 4
-    context.beginPath()
-    context.ellipse(0, 0, radius * 2.05, radius * 0.62, 0, 0, Math.PI * 2)
-    context.stroke()
-    context.restore()
+    const ring = new THREE.Mesh(new THREE.RingGeometry(radius * 1.35, radius * 2.05, 64), new THREE.MeshBasicMaterial({ color: 0xd7bf91, transparent: true, opacity: 0.75, side: THREE.DoubleSide }))
+    ring.rotation.x = Math.PI / 2.5
+    mesh.add(ring)
   }
-
-  drawGlow(x, y, radius * (isSelected ? 4.5 : 3.2), planet.accent)
-  const gradient = context.createRadialGradient(x - radius * 0.35, y - radius * 0.4, radius * 0.1, x, y, radius)
-  gradient.addColorStop(0, planet.accent)
-  gradient.addColorStop(0.38, planet.color)
-  gradient.addColorStop(1, '#111a2c')
-  context.fillStyle = gradient
-  context.beginPath()
-  context.arc(x, y, radius + (isSelected ? 1.5 : 0), 0, Math.PI * 2)
-  context.fill()
-  context.strokeStyle = isSelected ? '#f4f0df' : `${planet.accent}66`
-  context.lineWidth = isSelected ? 1.5 : 0.7
-  context.stroke()
-
-  if (planet.id === 'earth') {
-    context.fillStyle = '#75aa68bb'
-    context.beginPath()
-    context.ellipse(x - radius * 0.28, y - radius * 0.08, radius * 0.26, radius * 0.45, -0.4, 0, Math.PI * 2)
-    context.fill()
-    context.beginPath()
-    context.ellipse(x + radius * 0.26, y + radius * 0.23, radius * 0.16, radius * 0.25, 0.5, 0, Math.PI * 2)
-    context.fill()
-  }
-  if (planet.id === 'jupiter') {
-    context.strokeStyle = '#6d493d88'
-    context.lineWidth = 1.4
-    for (let offset = -0.52; offset <= 0.52; offset += 0.28) {
-      context.beginPath()
-      context.ellipse(x, y + radius * offset, radius * 0.82, radius * 0.11, 0, 0, Math.PI * 2)
-      context.stroke()
-    }
-  }
-  if (planet.id === 'uranus') {
-    context.save()
-    context.translate(x, y)
-    context.rotate(0.8)
-    context.strokeStyle = `${planet.accent}55`
-    context.lineWidth = 1
-    context.beginPath()
-    context.ellipse(0, 0, radius * 1.55, radius * 0.4, 0, 0, Math.PI * 2)
-    context.stroke()
-    context.restore()
-  }
-}
-
-function render(timestamp) {
-  const rect = canvas.getBoundingClientRect()
-  const width = rect.width
-  const height = rect.height
-  const centerX = width * 0.49
-  const centerY = height * 0.52
-  const orbitScale = Math.min(width, height) * 0.42
-  const baseRadius = Math.max(2.5, Math.min(width, height) / 78)
-
-  context.clearRect(0, 0, width, height)
-  const background = context.createLinearGradient(0, 0, width, height)
-  background.addColorStop(0, '#0b1323')
-  background.addColorStop(0.58, '#101a30')
-  background.addColorStop(1, '#09111f')
-  context.fillStyle = background
-  context.fillRect(0, 0, width, height)
-
-  for (const star of stars) {
-    context.fillStyle = `rgba(221, 232, 244, ${star.alpha})`
-    context.beginPath()
-    context.arc(star.x, star.y, star.radius, 0, Math.PI * 2)
-    context.fill()
-  }
-
-  context.strokeStyle = 'rgba(152, 180, 209, 0.13)'
-  context.lineWidth = 1
-  const orbitRadii = planets.map((planet) => orbitScale * planet.orbit)
-  orbitRadii.forEach((radius, index) => {
-    context.setLineDash(index < 4 ? [2, 5] : [1, 7])
-    context.beginPath()
-    context.ellipse(centerX, centerY, radius, radius * 0.46, -0.07, 0, Math.PI * 2)
-    context.stroke()
-  })
-  context.setLineDash([])
-
-  drawGlow(centerX, centerY, 74, '#e7aa4c')
-  const sunGradient = context.createRadialGradient(centerX - 6, centerY - 7, 2, centerX, centerY, 25)
-  sunGradient.addColorStop(0, '#fff4c4')
-  sunGradient.addColorStop(0.3, '#f8bd55')
-  sunGradient.addColorStop(1, '#b75628')
-  context.fillStyle = sunGradient
-  context.beginPath()
-  context.arc(centerX, centerY, 17, 0, Math.PI * 2)
-  context.fill()
-  context.strokeStyle = '#ffd98666'
-  context.lineWidth = 1
-  context.stroke()
-
-  planetPositions = planets.map((planet, index) => {
-    const orbit = orbitRadii[index]
-    const phase = index * 0.93 - elapsed * (0.55 / planet.period)
-    const x = centerX + Math.cos(phase) * orbit
-    const y = centerY + Math.sin(phase) * orbit * 0.46
-    const radius = baseRadius * (planet.radius / 8)
-    const isSelected = selectedPlanet.id === planet.id
-    const isHovered = hoveredPlanet?.id === planet.id
-    drawPlanet(planet, x, y, radius + (isHovered ? 2 : 0), isSelected)
-    if (labelsToggle.checked || isSelected || isHovered) {
-      const labelX = x + radius + 8
-      const labelY = y - radius - 5
-      context.font = `${isSelected ? '600' : '500'} 10px "IBM Plex Mono", monospace`
-      context.fillStyle = isSelected ? '#f6d18d' : 'rgba(221,232,244,0.68)'
-      context.fillText(planet.name.toUpperCase(), labelX, labelY)
-      context.fillStyle = 'rgba(221,232,244,0.36)'
-      context.font = '9px "IBM Plex Mono", monospace'
-      context.fillText(String(index + 1).padStart(2, '0'), labelX, labelY + 13)
-    }
-    return { planet, x, y, radius: Math.max(radius, 8) }
-  })
-
-  context.fillStyle = 'rgba(236, 242, 246, 0.45)'
-  context.font = '10px "IBM Plex Mono", monospace'
-  context.fillText('SOLEIL', centerX + 25, centerY + 3)
-
-  if (!paused) elapsed += (timestamp - lastFrame) / 1000 * speed
-  lastFrame = timestamp
-  requestAnimationFrame(render)
-}
-
-function updateInspector(planet) {
-  selectedPlanet = planet
-  document.querySelector('#planet-type').textContent = planet.type
-  document.querySelector('#planet-name').textContent = planet.name
-  document.querySelector('#planet-description').textContent = planet.description
-  document.querySelector('#planet-distance').textContent = planet.distance
-  document.querySelector('#planet-temperature').textContent = planet.temperature
-  document.querySelector('#planet-moons').textContent = planet.moons
-  document.querySelector('#planet-position').textContent = `${String(planets.indexOf(planet) + 1).padStart(2, '0')} / 08`
-  document.querySelector('#planet-id').textContent = `${planet.id.toUpperCase()} / ${planet.name.toUpperCase()}`
-  document.querySelector('#planet-swatch').style.setProperty('--planet-color', planet.color)
-  document.querySelector('#planet-swatch').style.setProperty('--planet-accent', planet.accent)
-  document.querySelectorAll('.planet-button').forEach((button) => {
-    const isActive = button.dataset.planet === planet.id
-    button.classList.toggle('active', isActive)
-    button.setAttribute('aria-pressed', String(isActive))
-  })
-}
-
-function buildPlanetIndex() {
-  planetButtons.innerHTML = planets.map((planet, index) => `
-    <button class="planet-button" type="button" data-planet="${planet.id}" aria-pressed="false">
-      <span class="button-number">${String(index + 1).padStart(2, '0')}</span>
-      <span class="button-orb" style="--orb-color:${planet.color};--orb-accent:${planet.accent}"></span>
-      <span class="button-name">${planet.name}</span>
-      <span class="button-type">${planet.type.replace('Planète ', '').replace('Géante ', '')}</span>
-    </button>
-  `).join('')
-  planetButtons.addEventListener('click', (event) => {
-    const button = event.target.closest('.planet-button')
-    if (!button) return
-    const planet = planets.find((item) => item.id === button.dataset.planet)
-    if (planet) updateInspector(planet)
-  })
-}
-
-function pointerPosition(event) {
-  const rect = canvas.getBoundingClientRect()
-  return { x: event.clientX - rect.left, y: event.clientY - rect.top }
-}
-
-canvas.addEventListener('mousemove', (event) => {
-  const pointer = pointerPosition(event)
-  hoveredPlanet = planetPositions.find(({ x, y, radius }) => Math.hypot(pointer.x - x, pointer.y - y) <= radius + 8)?.planet || null
-  canvas.style.cursor = hoveredPlanet ? 'pointer' : 'crosshair'
+  scene.add(group)
+  orbitGroups.push(group)
+  planetObjects.push({ planet, mesh, group, orbitRadius, angle: index * 0.78 })
 })
 
-canvas.addEventListener('mouseleave', () => { hoveredPlanet = null })
-canvas.addEventListener('click', (event) => {
-  const pointer = pointerPosition(event)
-  const target = planetPositions.find(({ x, y, radius }) => Math.hypot(pointer.x - x, pointer.y - y) <= radius + 10)
-  if (target) updateInspector(target.planet)
+const raycaster = new THREE.Raycaster()
+const pointer = new THREE.Vector2()
+renderer.domElement.addEventListener('pointerdown', (event) => {
+  const rect = renderer.domElement.getBoundingClientRect()
+  pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1
+  pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1
+  raycaster.setFromCamera(pointer, camera)
+  const hit = raycaster.intersectObjects(planetObjects.map((item) => item.mesh))[0]
+  if (hit?.object.userData.planet) selectPlanet(hit.object.userData.planet)
 })
 
-playToggle.addEventListener('click', () => {
+function selectPlanet(planet) {
+  selected = planet
+  document.querySelector('#swatch').style.setProperty('--planet', `#${planet.color.toString(16).padStart(6, '0')}`)
+  document.querySelector('#swatch').style.setProperty('--accent', planet.accent)
+  document.querySelector('#type').textContent = planet.type
+  document.querySelector('#name').textContent = planet.name
+  document.querySelector('#description').textContent = planet.description
+  document.querySelector('#diameter').textContent = `${planet.diameter.toLocaleString('fr-FR')} km`
+  document.querySelector('#distance').textContent = `${planet.distance.toLocaleString('fr-FR')} UA`
+  document.querySelector('#earth-ratio').textContent = `${(planet.diameter / 12756).toFixed(2).replace('.', ',')} ×`
+  document.querySelector('#moon-count').textContent = planet.moons.length ? `${planet.moons.length} principale${planet.moons.length > 1 ? 's' : ''}` : 'Aucune connue'
+  document.querySelector('#moon-list').innerHTML = planet.moons.length ? planet.moons.map((moon) => `<span>${moon}</span>`).join('') : '<span class="empty">Aucune lune principale</span>'
+  document.querySelector('#record-id').textContent = `${planet.id.toUpperCase()} / ${planet.name.toUpperCase()}`
+  document.querySelector('#view-selected').click()
+}
+
+function renderBars() {
+  const max = Math.max(...planets.map((planet) => compareMode === 'size' ? planet.diameter : planet.distance))
+  document.querySelector('#bars').innerHTML = planets.map((planet, index) => {
+    const value = compareMode === 'size' ? planet.diameter : planet.distance
+    const width = Math.max(3, Math.pow(value / max, 0.42) * 100)
+    const label = compareMode === 'size' ? `${planet.diameter.toLocaleString('fr-FR')} km` : `${planet.distance.toLocaleString('fr-FR')} UA`
+    return `<button class="bar-row ${planet.id === selected.id ? 'selected' : ''}" data-planet="${planet.id}" type="button"><span class="bar-index">${String(index + 1).padStart(2, '0')}</span><span class="bar-name">${planet.name}</span><span class="bar-track"><i style="width:${width}%;background:${planet.accent}"></i></span><strong>${label}</strong></button>`
+  }).join('')
+}
+
+document.querySelector('#bars').addEventListener('click', (event) => {
+  const row = event.target.closest('.bar-row')
+  if (row) selectPlanet(planets.find((planet) => planet.id === row.dataset.planet))
+})
+document.querySelectorAll('.compare-button').forEach((button) => button.addEventListener('click', () => {
+  compareMode = button.dataset.mode
+  document.querySelectorAll('.compare-button').forEach((item) => item.classList.toggle('active', item === button))
+  renderBars()
+}))
+document.querySelector('#pause').addEventListener('click', (event) => {
   paused = !paused
-  playToggle.setAttribute('aria-label', paused ? 'Reprendre la simulation' : 'Mettre la simulation en pause')
-  playToggle.querySelector('.play-icon').textContent = paused ? '▶' : 'Ⅱ'
-  playLabel.textContent = paused ? 'Lecture' : 'Pause'
+  event.currentTarget.innerHTML = paused ? '▶ <span>Lecture</span>' : 'Ⅱ <span>Pause</span>'
 })
-speedInput.addEventListener('input', () => {
-  speed = Number(speedInput.value)
-  speedValue.textContent = `${speed}×`
+document.querySelector('#speed').addEventListener('input', (event) => {
+  speed = Number(event.target.value)
+  document.querySelector('#speed-value').textContent = `${speed.toFixed(1).replace('.', ',')}×`
 })
-document.querySelector('#reset').addEventListener('click', () => {
-  elapsed = 0
-  updateInspector(defaultPlanet)
+document.querySelector('#reset-camera').addEventListener('click', () => {
+  camera.position.set(0, 30, 40)
+  controls.target.set(0, 0, 0)
+  controls.update()
 })
-labelsToggle.addEventListener('change', () => { canvas.setAttribute('aria-label', labelsToggle.checked ? 'Carte animée du système solaire avec étiquettes' : 'Carte animée du système solaire') })
-window.addEventListener('resize', resizeCanvas)
+document.querySelector('#view-system').addEventListener('click', () => {
+  controls.target.set(0, 0, 0)
+  camera.position.set(0, 30, 40)
+  controls.update()
+  document.querySelector('#view-system').classList.add('active')
+  document.querySelector('#view-selected').classList.remove('active')
+})
+document.querySelector('#view-selected').addEventListener('click', () => {
+  const item = planetObjects.find((entry) => entry.planet.id === selected.id)
+  controls.target.set(item.mesh.position.x / 2, 0, 0)
+  camera.position.set(item.mesh.position.x + 6, 7, item.mesh.position.x + 9)
+  controls.update()
+  document.querySelector('#view-selected').classList.add('active')
+  document.querySelector('#view-system').classList.remove('active')
+})
 
-buildPlanetIndex()
-updateInspector(defaultPlanet)
-resizeCanvas()
-requestAnimationFrame(render)
+function resize() {
+  const width = sceneHost.clientWidth
+  const height = sceneHost.clientHeight
+  camera.aspect = width / height
+  camera.updateProjectionMatrix()
+  renderer.setSize(width, height)
+}
+window.addEventListener('resize', resize)
+function animate(time) {
+  requestAnimationFrame(animate)
+  const delta = time * 0.00001 * speed
+  if (!paused) {
+    sun.rotation.y += 0.002
+    planetObjects.forEach((item, index) => {
+      item.angle = index * 0.78 + delta / (0.7 + index * 0.35)
+      item.group.rotation.y = item.angle
+      item.mesh.rotation.y += 0.004
+    })
+  }
+  controls.update()
+  renderer.render(scene, camera)
+}
+selectPlanet(selected)
+renderBars()
+requestAnimationFrame(animate)
