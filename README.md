@@ -32,6 +32,24 @@ Une visualisation interactive 3D du système solaire, construite avec Three.js e
 - **Distance Soleil** — distances en kilomètres réels
 - Sélection synchronisée (clic sur une barre → la planète suit en 3D)
 
+### Système typographique & identité
+
+L'identité « Observatoire / Field Notes » repose sur un registre **mono + sans** cohérent, **auto-hébergé** (aucune dépendance à Google Fonts) :
+
+| Rôle | Police | Justification |
+|---|---|---|
+| Corps & textes | **IBM Plex Sans** | Associe au Plex Mono pour former un système familial cohérent ; contraste affirmé vs. le réflexe Inter/Space Grotesk |
+| Données, labels, coordonnées | **IBM Plex Mono** | L'identité « carnet de notes / données » justifie un registre tabulaire et technique |
+
+Palette nommée (`:root` dans `src/style.css`) : `--ink`, `--panel`, `--line`, `--muted`, `--paper`, `--cream`, `--amber`, `--cyan` — aucune couleur hexadécimale jetée hors tokens.
+
+### Pages légales & conformité
+
+- `mentions-legales.html`, `confidentialite.html`, `contact.html` (dans `public/`)
+- `404.html` personnalisée
+- Le site **ne collecte aucune donnée personnelle** ni traceur ; pas de bannière cookies nécessaire.
+- ⚠️ Avant mise en production : compléter les champs `[À compléter]` (éditeur, adresse) et l'email de contact dans les pages légales.
+
 ## Stack technique
 
 | Technologie | Rôle |
@@ -75,11 +93,10 @@ Le site est accessible à : `https://loickamg.github.io/Solar-System/`
 ```
 solar-system/
 ├── .github/workflows/deploy.yml   # CI/CD GitHub Pages
-├── public/                         # Favicon, icons
+├── public/                         # Favicon, legal.css, pages légales, 404
 ├── src/
 │   ├── main.js                     # Point d'entrée : scène, données, textures, UI
-│   ├── style.css                   # Styles complets
-│   └── assets/
+│   └── style.css                   # Styles complets + design tokens
 ├── index.html                      # Shell HTML
 ├── package.json
 └── vite.config.js                  # base: '/Solar-System/'
