@@ -48,7 +48,7 @@ Palette nommée (`:root` dans `src/style.css`) : `--ink`, `--panel`, `--line`, `
 - `mentions-legales.html`, `confidentialite.html`, `contact.html` (dans `public/`)
 - `404.html` personnalisée
 - Le site **ne collecte aucune donnée personnelle** ni traceur ; pas de bannière cookies nécessaire.
-- ⚠️ Avant mise en production : compléter les champs `[À compléter]` (éditeur, adresse) et l'email de contact dans les pages légales.
+- Mentions légales : Éditeur (Mahouna, non professionnel), contact (mahounaamg@gmail.com) et mention d'hébergement sont renseignés dans les pages légales (`public/`). L'hébergeur (GitHub Pages) est indiqué.
 
 ## Stack technique
 
