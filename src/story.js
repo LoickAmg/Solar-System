@@ -47,10 +47,19 @@ function chapterHtml(c, i) {
   if (c.kind === 'intro') {
     return `<section class="chapter chapter--intro" id="ch-intro" data-chapter="${i}" aria-label="Introduction">
       <div class="ui intro-ui">
-        <p class="intro-kicker"><span></span>Solar System · Le récit<span></span></p>
-        <h1 class="intro-title split"><span class="line">${split('L’histoire du')}</span><span class="line accent">${split('système solaire')}</span></h1>
-        <p class="intro-sub">Un voyage de 4,6 milliards d’années, de la poussière d’étoiles jusqu’aux confins de Neptune. Chaque défilement vous rapproche d’un nouveau monde.</p>
-        <div class="scroll-cue"><span class="mouse"><i></i></span>Faites défiler pour commencer</div>
+        <div class="intro-copy">
+          <p class="intro-eyebrow"><span class="rule"></span>Un récit en onze chapitres</p>
+          <h1 class="intro-title">
+            <span class="mask"><span class="line line--pre" style="--d:.15s">L’histoire du</span></span>
+            <span class="mask"><span class="line line--main" style="--d:.3s">Système</span></span>
+            <span class="mask"><span class="line line--main" style="--d:.45s">solaire</span></span>
+          </h1>
+          <p class="intro-sub">De la poussière d’étoiles aux confins de Neptune&nbsp;: 4,6&nbsp;milliards d’années, racontées au fil du défilement.</p>
+        </div>
+        <div class="intro-foot">
+          <div class="scroll-cue"><span class="scroll-line"><i></i></span><span>Commencer le voyage</span></div>
+          <button class="intro-sound" type="button" data-sound><span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Pour l’immersion, activez le son</button>
+        </div>
       </div>
     </section>`
   }
@@ -336,7 +345,7 @@ function poseFor(i, l) {
   const c = chapters[i]
   switch (c.kind) {
     case 'intro':
-      return { pos: new THREE.Vector3(Math.sin(l * 0.4) * 8, 3 + l * 4, 96 - l * 10), target: new THREE.Vector3(0, 0, 0), ox: 0, oy: 0 }
+      return { pos: new THREE.Vector3(Math.sin(l * 0.4) * 8, 3 + l * 4, 104 - l * 10), target: new THREE.Vector3(0, 0, 0), ...sideOffset('left') }
     case 'nebula': {
       const k = l / 0.72
       return { pos: new THREE.Vector3(Math.sin(k * 0.8) * 20, 8 + k * 18, 64 - k * 18), target: new THREE.Vector3(0, 0, 0), ...sideOffset(c.side) }
@@ -459,6 +468,7 @@ function setActive(i, l) {
   for (let j = 0; j < N; j++) if (j !== on) activeBeat[j] = -1
   if (on >= 0) sections[on].style.setProperty('--shift', `${((0.5 - l) * 0.55 * innerWidth).toFixed(1)}px`)
 
+  document.body.classList.toggle('in-intro', i === 0 && l < 0.3)
   document.body.classList.toggle('is-overview', i === idx.epilogue && l > 0.05)
   document.body.classList.toggle('show-here', i === idx.epilogue && activeBeat[idx.epilogue] >= 1)
 }
@@ -542,14 +552,17 @@ function chime(i) {
   o.stop(ctx.currentTime + 3.3)
 }
 
-soundBtn.addEventListener('click', async () => {
+async function toggleSound() {
   if (!audio) audio = startAudio()
   else if (audio.ctx.state === 'running') await audio.ctx.suspend()
   else await audio.ctx.resume()
   const on = audio.ctx.state === 'running'
   soundBtn.setAttribute('aria-pressed', String(on))
   soundBtn.querySelector('.lbl').textContent = on ? 'Son activé' : 'Son'
-})
+  document.body.classList.toggle('sound-on', on)
+}
+soundBtn.addEventListener('click', toggleSound)
+document.querySelector('[data-sound]').addEventListener('click', toggleSound)
 
 /* ==========================================================
    NAVIGATION
@@ -619,6 +632,7 @@ function frame() {
   nebula.uniforms.uTime.value = time
   nebula.uniforms.uCollapse.value = collapse
   nebula.uniforms.uDisperse.value = disperse
+  nebula.uniforms.uOpacity.value = 0.72 + 0.28 * smoothstep(0.2, 1, g)
   nebula.points.visible = disperse < 0.999
 
   sun.group.visible = g > 1.02
