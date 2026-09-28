@@ -193,8 +193,11 @@ function buildTexture(w, h, fn) {
 function toTexture(canvas, linear = false) {
   const tex = new THREE.CanvasTexture(canvas)
   if (!linear) tex.colorSpace = THREE.SRGBColorSpace
-  tex.anisotropy = 8
+  tex.anisotropy = 16
   tex.wrapS = THREE.RepeatWrapping
+  tex.minFilter = THREE.LinearMipmapLinearFilter
+  tex.magFilter = THREE.LinearFilter
+  tex.generateMipmaps = true
   return tex
 }
 
@@ -225,18 +228,18 @@ const textures = {}
 
 // Mercure — gris cratérisé
 {
-  const { canvas, ctx } = buildTexture(512, 256, (u, v, cu, sv) => {
+  const { canvas, ctx } = buildTexture(1024, 512, (u, v, cu, sv) => {
     const e = N.fbm(cu * 2.4 + 3.7, v * 4.8, 4) * 0.6 + N.fbm(sv * 4.2 + 8.1, v * 9.0, 3) * 0.4
     const base = mix3([112, 112, 118], [178, 178, 184], e)
     const g = 1 - 0.22 * N.fbm(cu * 9 + 1.2, sv * 9 + 3.3, 2)
     return [base[0] * g, base[1] * g, base[2] * g]
   })
-  craters(ctx, 512, 256, 130)
+  craters(ctx, 1024, 512, 340)
   textures.mercury = toTexture(canvas)
 }
 
 // Vénus — nuages ocre en swirl
-textures.venus = toTexture(buildTexture(512, 256, (u, v, cu, sv) => {
+textures.venus = toTexture(buildTexture(1024, 512, (u, v, cu, sv) => {
   const w1 = N.fbm(cu * 1.8 + 3.3, v * 3.6, 3)
   const sw = N.fbm(cu * 3.4 + w1 * 1.7 + 11.0, v * 6.4 + w1 * 1.3, 4)
   return mix3([196, 144, 78], [242, 216, 162], sw)
@@ -244,12 +247,13 @@ textures.venus = toTexture(buildTexture(512, 256, (u, v, cu, sv) => {
 
 // Terre — couleur + specular océans + nuages
 {
-  const w = 1024, h = 512
+  const w = 2048, h = 1024
   const c1 = document.createElement('canvas'); c1.width = w; c1.height = h
   const c2 = document.createElement('canvas'); c2.width = w; c2.height = h
   const x1 = c1.getContext('2d'), x2 = c2.getContext('2d')
   const i1 = x1.createImageData(w, h), i2 = x2.createImageData(w, h)
   const d1 = i1.data, d2 = i2.data
+  const isLand = new Uint8Array(w * h)
   for (let y = 0; y < h; y++) {
     const v = y / h
     const pol = smoothstep(0.35, 0.385, Math.abs(v - 0.5))
@@ -263,6 +267,7 @@ textures.venus = toTexture(buildTexture(512, 256, (u, v, cu, sv) => {
         col = mix3([42, 104, 66], [178, 154, 102], smoothstep(0.42, 0.74, g))
         if (Math.abs(v - 0.5) < 0.16 && g > 0.56) col = mix3(col, [204, 176, 118], 0.6)
         spec = 30
+        isLand[y * w + x] = pol > 0.4 ? 0 : 1
       } else {
         col = mix3([10, 38, 92], [28, 96, 165], smoothstep(0.3, 0.545, e))
         spec = 235
@@ -279,14 +284,43 @@ textures.venus = toTexture(buildTexture(512, 256, (u, v, cu, sv) => {
   x1.putImageData(i1, 0, 0); x2.putImageData(i2, 0, 0)
   textures.earth = toTexture(c1)
   textures.earthSpec = toTexture(c2, true)
-  textures.clouds = toTexture(buildTexture(512, 256, (u, v, cu, sv) => {
+  textures.clouds = toTexture(buildTexture(1024, 512, (u, v, cu, sv) => {
     const c = N.fbm(cu * 2.6 + 21.0, v * 5.4, 4) * 0.6 + N.fbm(sv * 5.2 + 4.4, v * 10.5, 3) * 0.4
     return [255, 255, 255, smoothstep(0.52, 0.8, c) * 235]
   }).canvas)
+
+  // Lumières de villes, côté nuit : des amas de points sur la terre ferme seulement,
+  // plus denses aux latitudes moyennes (comme les vraies photos nocturnes de la Terre).
+  const c3 = document.createElement('canvas'); c3.width = w; c3.height = h
+  const x3 = c3.getContext('2d')
+  x3.fillStyle = '#000'; x3.fillRect(0, 0, w, h)
+  const cityRand = makeNoise(4242)
+  let placed = 0, tries = 0
+  while (placed < 260 && tries < 20000) {
+    tries++
+    const cx = Math.floor(cityRand.fbm(tries * 12.9, 3.1, 1) * w) % w
+    const cy = Math.floor(((cityRand.fbm(2.3, tries * 7.7, 1) * 0.72) + 0.14) * h)
+    if (!isLand[cy * w + cx]) continue
+    placed++
+    const clusterR = 6 + Math.random() * 22
+    const dots = 8 + Math.floor(Math.random() * 26)
+    for (let d = 0; d < dots; d++) {
+      const ang = Math.random() * Math.PI * 2
+      const rad = Math.random() * clusterR
+      const px = Math.round(cx + Math.cos(ang) * rad)
+      const py = Math.round(cy + Math.sin(ang) * rad * 0.6)
+      if (px < 0 || px >= w || py < 0 || py >= h || !isLand[py * w + px]) continue
+      const r = 0.6 + Math.random() * 1.4
+      const warm = Math.random() > 0.25
+      x3.fillStyle = warm ? 'rgba(255,214,140,0.9)' : 'rgba(200,220,255,0.7)'
+      x3.beginPath(); x3.arc(px, py, r, 0, Math.PI * 2); x3.fill()
+    }
+  }
+  textures.earthNight = toTexture(c3)
 }
 
 // Mars — ocre + mers sombres + calottes
-textures.mars = toTexture(buildTexture(768, 384, (u, v, cu, sv) => {
+textures.mars = toTexture(buildTexture(1536, 768, (u, v, cu, sv) => {
   const e = N.fbm(cu * 2.2 + 8.8, v * 4.6, 4) * 0.65 + N.fbm(sv * 4.6 + 2.2, v * 9.4, 3) * 0.35
   let col = mix3([142, 52, 24], [218, 132, 82], e)
   const m = N.fbm(cu * 1.5 + 2.2, v * 3.0, 3)
@@ -301,18 +335,19 @@ textures.mars = toTexture(buildTexture(768, 384, (u, v, cu, sv) => {
     [0.30, '#f0e0c0'], [0.38, '#c49a6a'], [0.46, '#ead2a8'], [0.52, '#a87850'],
     [0.60, '#f2e2c4'], [0.68, '#c08c5e'], [0.76, '#e6cfa8'], [0.84, '#b08860'],
     [0.92, '#d8bc94'], [1, '#a07858']])
-  const { canvas, ctx } = buildTexture(1024, 512, (u, v, cu, sv) => {
+  const W = 2048, H = 1024
+  const { canvas, ctx } = buildTexture(W, H, (u, v, cu, sv) => {
     const tb = (N.fbm(cu * 2.6 + 4.2, v * 22, 4) - 0.5) * 0.055 + (N.fbm(sv * 7.0 + 9.1, v * 44, 3) - 0.5) * 0.02
     const col = paletteAt(stops, v + tb)
     const b = 1 + (N.fbm(cu * 8.0 + 1.0, v * 55, 3) - 0.5) * 0.22
     return [col[0] * b, col[1] * b, col[2] * b]
   })
   ctx.fillStyle = 'rgba(240,220,190,0.35)'
-  ctx.beginPath(); ctx.ellipse(1024 * 0.30, 512 * 0.63, 1024 * 0.07, 512 * 0.055, 0, 0, Math.PI * 2); ctx.fill()
+  ctx.beginPath(); ctx.ellipse(W * 0.30, H * 0.63, W * 0.07, H * 0.055, 0, 0, Math.PI * 2); ctx.fill()
   ctx.fillStyle = 'rgba(186,84,46,0.85)'
-  ctx.beginPath(); ctx.ellipse(1024 * 0.30, 512 * 0.63, 1024 * 0.052, 512 * 0.04, 0, 0, Math.PI * 2); ctx.fill()
+  ctx.beginPath(); ctx.ellipse(W * 0.30, H * 0.63, W * 0.052, H * 0.04, 0, 0, Math.PI * 2); ctx.fill()
   ctx.fillStyle = 'rgba(222,124,92,0.9)'
-  ctx.beginPath(); ctx.ellipse(1024 * 0.30, 512 * 0.63, 1024 * 0.028, 512 * 0.021, 0, 0, Math.PI * 2); ctx.fill()
+  ctx.beginPath(); ctx.ellipse(W * 0.30, H * 0.63, W * 0.028, H * 0.021, 0, 0, Math.PI * 2); ctx.fill()
   textures.jupiter = toTexture(canvas)
 }
 
@@ -320,7 +355,7 @@ textures.mars = toTexture(buildTexture(768, 384, (u, v, cu, sv) => {
 {
   const stops = P([[0, '#b39872'], [0.1, '#cdb387'], [0.2, '#e2cd9f'], [0.35, '#d4b98a'],
     [0.5, '#ecd9ae'], [0.65, '#d6bd8e'], [0.8, '#e8d4a6'], [0.92, '#c4a87a'], [1, '#ab9068']])
-  textures.saturn = toTexture(buildTexture(768, 384, (u, v, cu, sv) => {
+  textures.saturn = toTexture(buildTexture(1536, 768, (u, v, cu, sv) => {
     const tb = (N.fbm(cu * 2.2 + 6.5, v * 18, 3) - 0.5) * 0.025
     return paletteAt(stops, v + tb)
   }).canvas)
@@ -329,7 +364,7 @@ textures.mars = toTexture(buildTexture(768, 384, (u, v, cu, sv) => {
 // Uranus — dégradé cyan lissé
 {
   const stops = P([[0, '#8ec8ce'], [0.45, '#aadde0'], [0.55, '#a2d8da'], [1, '#78b6bd']])
-  textures.uranus = toTexture(buildTexture(512, 256, (u, v, cu, sv) => {
+  textures.uranus = toTexture(buildTexture(1024, 512, (u, v, cu, sv) => {
     const t = v + (N.fbm(cu * 2.0 + 5.0, v * 8.0, 3) - 0.5) * 0.04
     const col = paletteAt(stops, t)
     const band = 1 - 0.05 * (1 - smoothstep(0, 0.05, Math.abs(v - 0.62)))
@@ -340,7 +375,8 @@ textures.mars = toTexture(buildTexture(768, 384, (u, v, cu, sv) => {
 // Neptune — bleu profond + traînées + tache sombre
 {
   const stops = P([[0, '#2b49a8'], [0.35, '#3a63c8'], [0.5, '#4a7ad9'], [0.68, '#3a5fc0'], [1, '#27438f']])
-  const { canvas, ctx } = buildTexture(512, 256, (u, v, cu, sv) => {
+  const NW = 1024, NH = 512
+  const { canvas, ctx } = buildTexture(NW, NH, (u, v, cu, sv) => {
     const tb = (N.fbm(cu * 2.4 + 7.7, v * 14, 3) - 0.5) * 0.03
     let col = paletteAt(stops, v + tb)
     const streak = N.fbm(cu * 3.0 + 14.0, v * 18, 3)
@@ -348,25 +384,25 @@ textures.mars = toTexture(buildTexture(768, 384, (u, v, cu, sv) => {
     return col
   })
   ctx.fillStyle = 'rgba(18,30,72,0.55)'
-  ctx.beginPath(); ctx.ellipse(512 * 0.42, 256 * 0.45, 512 * 0.09, 256 * 0.05, 0, 0, Math.PI * 2); ctx.fill()
+  ctx.beginPath(); ctx.ellipse(NW * 0.42, NH * 0.45, NW * 0.09, NH * 0.05, 0, 0, Math.PI * 2); ctx.fill()
   textures.neptune = toTexture(canvas)
 }
 
 // Lune — gris + mers + cratères
 {
-  const { canvas, ctx } = buildTexture(256, 128, (u, v, cu, sv) => {
+  const { canvas, ctx } = buildTexture(512, 256, (u, v, cu, sv) => {
     const e = N.fbm(cu * 2.6 + 5.5, v * 5.2, 4) * 0.6 + N.fbm(sv * 5.0 + 2.7, v * 10, 3) * 0.4
     let col = mix3([140, 140, 144], [204, 204, 208], e)
     const m = N.fbm(cu * 1.6 + 6.0, v * 2.2, 3)
     if (m > 0.62) col = mix3(col, [96, 96, 100], (m - 0.62) * 3)
     return col
   })
-  craters(ctx, 256, 128, 60, 0.8)
+  craters(ctx, 512, 256, 170, 0.8)
   textures.moon = toTexture(canvas)
 }
 
 // Anneaux de Saturne — bandes radiales + divisions de Cassini/Encke
-textures.ringSaturn = toTexture(buildTexture(1024, 8, (u) => {
+textures.ringSaturn = toTexture(buildTexture(2048, 24, (u) => {
   const t = u
   const n = N.fbm(t * 34, 0.5, 3)
   let a = 0.3 + 0.7 * smoothstep(0.35, 0.75, n)
@@ -379,7 +415,7 @@ textures.ringSaturn = toTexture(buildTexture(1024, 8, (u) => {
 }).canvas)
 
 // Anneaux d'Uranus — discrets, un anneau lumineux (epsilon)
-textures.ringUranus = toTexture(buildTexture(256, 8, (u) => {
+textures.ringUranus = toTexture(buildTexture(512, 16, (u) => {
   const t = u
   let a = 0.85 * (1 - smoothstep(0, 0.02, Math.abs(t - 0.76)))
   a = Math.max(a, 0.14 * (1 - smoothstep(0, 0.03, Math.abs(t - 0.5))))
@@ -388,14 +424,15 @@ textures.ringUranus = toTexture(buildTexture(256, 8, (u) => {
 
 // Sprite de lueur solaire
 function glowTexture() {
-  const c = document.createElement('canvas'); c.width = 256; c.height = 256
+  const c = document.createElement('canvas'); c.width = 512; c.height = 512
   const x = c.getContext('2d')
-  const g = x.createRadialGradient(128, 128, 0, 128, 128, 128)
-  g.addColorStop(0, 'rgba(255,214,140,0.9)')
-  g.addColorStop(0.22, 'rgba(255,160,60,0.4)')
-  g.addColorStop(0.5, 'rgba(255,120,30,0.14)')
+  const g = x.createRadialGradient(256, 256, 0, 256, 256, 256)
+  g.addColorStop(0, 'rgba(255,238,196,0.95)')
+  g.addColorStop(0.14, 'rgba(255,214,140,0.85)')
+  g.addColorStop(0.30, 'rgba(255,160,60,0.4)')
+  g.addColorStop(0.55, 'rgba(255,120,30,0.14)')
   g.addColorStop(1, 'rgba(255,110,20,0)')
-  x.fillStyle = g; x.fillRect(0, 0, 256, 256)
+  x.fillStyle = g; x.fillRect(0, 0, 512, 512)
   return new THREE.CanvasTexture(c)
 }
 
@@ -454,6 +491,81 @@ let followId = null
 let camTween = null
 const lastFollow = new THREE.Vector3()
 const labelEls = {}
+const ringShadowUniforms = {}
+const _sunLocalTmp = new THREE.Vector3()
+
+/** Éclairage nocturne de la Terre : un halo de villes qui n'apparaît que côté nuit,
+ * calculé à partir de la normale et de la position du fragment en espace monde (le
+ * Soleil est toujours à l'origine du monde, donc la direction vers lui est -vWorldPos). */
+function attachEarthNightLights(material, nightTexture) {
+  material.onBeforeCompile = (shader) => {
+    shader.uniforms.nightMap = { value: nightTexture }
+    shader.vertexShader = `varying vec3 vWorldPos;
+varying vec3 vWorldNormal;
+${shader.vertexShader}`.replace(
+      '#include <begin_vertex>',
+      `#include <begin_vertex>
+ vWorldPos = (modelMatrix * vec4(position, 1.0)).xyz;
+ vWorldNormal = normalize(mat3(modelMatrix) * normal);`
+    )
+    shader.fragmentShader = `varying vec3 vWorldPos;
+varying vec3 vWorldNormal;
+uniform sampler2D nightMap;
+${shader.fragmentShader}`.replace(
+      '#include <emissivemap_fragment>',
+      `#include <emissivemap_fragment>
+      {
+        vec3 toSun = normalize(-vWorldPos);
+        float ndotl = dot(normalize(vWorldNormal), toSun);
+        float nightMix = smoothstep(0.25, -0.2, ndotl);
+        vec3 cityLight = texture2D(nightMap, vMapUv).rgb;
+        totalEmissiveRadiance += cityLight * nightMix * 1.8;
+      }`
+    )
+  }
+}
+
+/** Ombre portée d'un anneau sur son globe : un point de la surface est dans l'ombre si le
+ * segment qui le relie au Soleil (à l'origine du monde) traverse le plan de l'anneau entre
+ * son rayon intérieur et extérieur. Calculé en espace objet (le maillage et l'anneau
+ * partagent le même parent, sans rotation propre : la géométrie brute suffit). */
+function attachRingShadow(material, innerR, outerR, key) {
+  const uniforms = { uSunLocal: { value: new THREE.Vector3() }, uRingInner: { value: innerR }, uRingOuter: { value: outerR } }
+  material.onBeforeCompile = (shader) => {
+    shader.uniforms.uSunLocal = uniforms.uSunLocal
+    shader.uniforms.uRingInner = uniforms.uRingInner
+    shader.uniforms.uRingOuter = uniforms.uRingOuter
+    shader.vertexShader = `varying vec3 vObjPos;
+${shader.vertexShader}`.replace(
+      '#include <begin_vertex>',
+      `#include <begin_vertex>
+ vObjPos = position;`
+    )
+    shader.fragmentShader = `varying vec3 vObjPos;
+uniform vec3 uSunLocal;
+uniform float uRingInner;
+uniform float uRingOuter;
+${shader.fragmentShader}`.replace(
+      '#include <map_fragment>',
+      `#include <map_fragment>
+      {
+        float dy = uSunLocal.y - vObjPos.y;
+        if (abs(dy) > 1e-5) {
+          float t = -vObjPos.y / dy;
+          if (t > 0.0 && t < 1.0) {
+            vec2 ip = vObjPos.xz + t * (uSunLocal.xz - vObjPos.xz);
+            float r = length(ip);
+            float innerEdge = smoothstep(uRingInner - 0.05, uRingInner + 0.05, r);
+            float outerEdge = 1.0 - smoothstep(uRingOuter - 0.05, uRingOuter + 0.05, r);
+            float shadow = clamp(innerEdge * outerEdge, 0.0, 1.0);
+            diffuseColor.rgb *= (1.0 - shadow * 0.82);
+          }
+        }
+      }`
+    )
+  }
+  ringShadowUniforms[key] = uniforms
+}
 const HOME_POS = new THREE.Vector3(0, 32, 44)
 
 /* ==========================================================
@@ -521,14 +633,14 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75))
 renderer.setSize(sceneHost.clientWidth, sceneHost.clientHeight)
 renderer.outputColorSpace = THREE.SRGBColorSpace
 renderer.toneMapping = THREE.ACESFilmicToneMapping
-renderer.toneMappingExposure = 1.15
+renderer.toneMappingExposure = 1.05
 sceneHost.prepend(renderer.domElement)
 
 const composer = new EffectComposer(renderer)
 composer.setPixelRatio(renderer.getPixelRatio())
 composer.setSize(sceneHost.clientWidth, sceneHost.clientHeight)
 composer.addPass(new RenderPass(scene, camera))
-const bloom = new UnrealBloomPass(new THREE.Vector2(sceneHost.clientWidth, sceneHost.clientHeight), 0.72, 0.6, 0.78)
+const bloom = new UnrealBloomPass(new THREE.Vector2(sceneHost.clientWidth, sceneHost.clientHeight), 0.74, 0.5, 0.82)
 composer.addPass(bloom)
 composer.addPass(new OutputPass())
 
@@ -569,8 +681,10 @@ function starField(count, size, opacity) {
   geo.setAttribute('color', new THREE.BufferAttribute(col, 3))
   return new THREE.Points(geo, new THREE.PointsMaterial({ size, sizeAttenuation: false, vertexColors: true, transparent: true, opacity, depthWrite: false }))
 }
-scene.add(starField(2600, 1.6, 0.85))
-scene.add(starField(160, 3.2, 1))
+const starsFar = starField(2600, 1.6, 0.85)
+const starsNear = starField(160, 3.2, 1)
+scene.add(starsFar)
+scene.add(starsNear)
 {
   const count = 2400
   const geo = new THREE.BufferGeometry()
@@ -678,11 +792,12 @@ planets.forEach((planet, index) => {
 
   let mesh, clouds = null
   if (planet.id === 'earth') {
-    mesh = new THREE.Mesh(new THREE.SphereGeometry(radius, 48, 32), new THREE.MeshPhongMaterial({ map: textures.earth, specularMap: textures.earthSpec, specular: new THREE.Color(0x8fa8c0), shininess: 16 }))
-    clouds = new THREE.Mesh(new THREE.SphereGeometry(radius * 1.02, 48, 32), new THREE.MeshStandardMaterial({ map: textures.clouds, transparent: true, opacity: 0.9, roughness: 1, depthWrite: false }))
+    mesh = new THREE.Mesh(new THREE.SphereGeometry(radius, 96, 64), new THREE.MeshPhongMaterial({ map: textures.earth, specularMap: textures.earthSpec, specular: new THREE.Color(0x8fa8c0), shininess: 16 }))
+    attachEarthNightLights(mesh.material, textures.earthNight)
+    clouds = new THREE.Mesh(new THREE.SphereGeometry(radius * 1.02, 64, 48), new THREE.MeshStandardMaterial({ map: textures.clouds, transparent: true, opacity: 0.9, roughness: 1, depthWrite: false }))
     tiltGroup.add(clouds)
   } else {
-    mesh = new THREE.Mesh(new THREE.SphereGeometry(radius, 48, 32), new THREE.MeshStandardMaterial({ map: textures[planet.id], roughness: 0.88, metalness: 0.02 }))
+    mesh = new THREE.Mesh(new THREE.SphereGeometry(radius, 72, 48), new THREE.MeshStandardMaterial({ map: textures[planet.id], roughness: 0.88, metalness: 0.02 }))
   }
   mesh.userData.planet = planet
   tiltGroup.add(mesh)
@@ -695,13 +810,17 @@ planets.forEach((planet, index) => {
     const thin = new THREE.Mesh(new THREE.RingGeometry(radius * 2.42, radius * 2.6, 128), new THREE.MeshBasicMaterial({ color: 0xcbb078, transparent: true, opacity: 0.18, side: THREE.DoubleSide, depthWrite: false }))
     thin.rotation.x = Math.PI / 2
     tiltGroup.add(thin)
+    attachRingShadow(mesh.material, radius * 1.22, radius * 2.6, 'saturn')
   }
-  if (planet.id === 'uranus') addRing(tiltGroup, radius * 1.55, radius * 2.05, textures.ringUranus, 0.8)
+  if (planet.id === 'uranus') {
+    addRing(tiltGroup, radius * 1.55, radius * 2.05, textures.ringUranus, 0.8)
+    attachRingShadow(mesh.material, radius * 1.53, radius * 2.07, 'uranus')
+  }
 
   const moons = planet.moons.map((cfg, mi) => {
     const moonRadius = Math.max(0.045, radius * cfg.r)
     const moonOrbitRadius = radius * cfg.d
-    const moonMesh = new THREE.Mesh(new THREE.SphereGeometry(moonRadius, 20, 14), new THREE.MeshStandardMaterial({ map: textures.moon, color: cfg.c, roughness: 0.95 }))
+    const moonMesh = new THREE.Mesh(new THREE.SphereGeometry(moonRadius, 28, 18), new THREE.MeshStandardMaterial({ map: textures.moon, color: cfg.c, roughness: 0.95 }))
     moonMesh.userData = { moon: true, name: cfg.name, planetId: planet.id }
     const moonGroup = new THREE.Group()
     moonMesh.position.x = moonOrbitRadius
@@ -983,6 +1102,14 @@ function animate() {
         m.group.rotation.y = m.angle
       })
     })
+    scene.updateMatrixWorld(true)
+    for (const id of ['saturn', 'uranus']) {
+      const item = planetObjects.find((o) => o.planet.id === id)
+      const u = ringShadowUniforms[id]
+      if (item && u) u.uSunLocal.value.copy(item.mesh.worldToLocal(_sunLocalTmp.set(0, 0, 0)))
+    }
+    const twinkle = 1 + Math.sin(clock.elapsedTime * 0.7) * 0.05
+    starsFar.material.opacity = 0.85 * twinkle
   }
 
   if (camTween) {

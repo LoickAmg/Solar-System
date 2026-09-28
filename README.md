@@ -8,10 +8,13 @@ Une visualisation interactive 3D du système solaire, construite avec Three.js e
 
 ### Rendu 3D
 - **Soleil animé** — shader GLSL avec bruit simplex 3D (granulation, flares), lueur additive, bloom post-processing
-- **Textures procédurales HD** — génération par-pixel sans couture (échantillonnage cos/sin) : Terre (continents, océans spéculaires, calottes, nuages), Jupiter (bandes turbulentes + Grande Tache Rouge), Saturne (anneaux avec divisions de Cassini/Encke)
+- **Textures procédurales HD** — génération par-pixel sans couture (échantillonnage cos/sin), en 1024×512 à 2048×1024 selon la planète : Terre (continents, océans spéculaires, calottes, nuages), Jupiter (bandes turbulentes + Grande Tache Rouge), Saturne (anneaux avec divisions de Cassini/Encke)
+- **Lumières de villes sur la Terre** — un calque de villes généré par code, qui n'apparaît que côté nuit (injecté dans le shader Phong via `onBeforeCompile`, sans dépendance ni image téléchargée)
+- **Ombre portée des anneaux** — Saturne et Uranus projettent l'ombre réelle de leur anneau sur leur propre globe, calculée par un test d'intersection rayon/disque dans le shader (position du Soleil, du point de la surface et du plan de l'anneau)
 - **Atmosphères Fresnel** — halo rim-light sur Terre, Vénus, Mars, Uranus, Neptune
 - **Anneaux texturés** — UV radiaux sur RingGeometry, Saturne (2 anneaux) et Uranus (anneau epsilon)
 - **Ceinture d'astéroïdes** — ~550 roches instanciées (InstancedMesh) entre Mars et Jupiter
+- **Étoiles scintillantes** — légère variation d'opacité du champ d'étoiles lointain, en continu
 
 ### Données réelles
 - **8 planètes** avec masse, gravité, période orbitale, durée du jour, température, type
