@@ -4,17 +4,33 @@ Une visualisation interactive 3D du système solaire, construite avec Three.js e
 
 [https://loickamg.github.io/Solar-System/](https://loickamg.github.io/Solar-System/)
 
+## Deux façons de visiter
+
+- **Classique** (`index.html`) — la carte 3D interactive : orbite libre, fiches d'observation, comparateur.
+- **Récit** (`recit.html`) — le système solaire raconté comme une histoire, piloté par le défilement.
+  On part d'un nuage de gaz qui s'effondre en disque, le Soleil s'allume dans un éclair, puis la
+  caméra vole de monde en monde — Mercure, Vénus (dont les nuages se dissipent pour révéler le sol
+  pendant le récit de Venera 13), la Terre et ses lumières nocturnes, Mars, la traversée de la
+  ceinture d'astéroïdes, les géantes — jusqu'à l'épilogue du « point bleu pâle » de Voyager 1, avec
+  un « Vous êtes ici » sur la Terre. Chaque chapitre dévoile son texte en plusieurs temps (arrivée,
+  origine du nom, récit, le saviez-vous et chiffres clés animés).
+  Habillage : titres lettre par lettre, nom géant en filigrane qui glisse au défilement, traînées de
+  vitesse pendant les voyages, compteur de distance au Soleil et de temps-lumière, navigation par
+  chapitres, grain de pellicule, parallaxe à la souris, ambiance sonore synthétisée (coupée par
+  défaut). Respecte `prefers-reduced-motion`.
+
+Une bascule **Classique / Récit** est présente dans l'en-tête des deux pages.
+
 ## Fonctionnalités
 
 ### Rendu 3D
-- **Soleil animé** — shader GLSL avec bruit simplex 3D (granulation, flares), lueur additive, bloom post-processing
-- **Textures procédurales HD** — génération par-pixel sans couture (échantillonnage cos/sin), en 1024×512 à 2048×1024 selon la planète : Terre (continents, océans spéculaires, calottes, nuages), Jupiter (bandes turbulentes + Grande Tache Rouge), Saturne (anneaux avec divisions de Cassini/Encke)
-- **Lumières de villes sur la Terre** — un calque de villes généré par code, qui n'apparaît que côté nuit (injecté dans le shader Phong via `onBeforeCompile`, sans dépendance ni image téléchargée)
-- **Ombre portée des anneaux** — Saturne et Uranus projettent l'ombre réelle de leur anneau sur leur propre globe, calculée par un test d'intersection rayon/disque dans le shader (position du Soleil, du point de la surface et du plan de l'anneau)
-- **Atmosphères Fresnel** — halo rim-light sur Terre, Vénus, Mars, Uranus, Neptune
-- **Anneaux texturés** — UV radiaux sur RingGeometry, Saturne (2 anneaux) et Uranus (anneau epsilon)
-- **Ceinture d'astéroïdes** — ~550 roches instanciées (InstancedMesh) entre Mars et Jupiter
-- **Étoiles scintillantes** — légère variation d'opacité du champ d'étoiles lointain, en continu
+- **Textures photographiques 2K** — cartes [Solar System Scope](https://www.solarsystemscope.com/textures/) (CC BY 4.0, d'après les données NASA) pour le Soleil, les huit planètes, la Lune, les nuages et les lumières nocturnes de la Terre, les anneaux de Saturne et la Voie lactée (fond de ciel équirectangulaire) — dans `public/textures/`
+- **Soleil animé** — la texture solaire « bout » sous un bruit simplex 3D, avec assombrissement centre-bord et couronne ; bloom post-processing
+- **Terre** — reflets du soleil sur les océans (masque spéculaire dérivé de la carte), nuages, et lumières des villes qui n'apparaissent que côté nuit (injectées dans le shader Phong via `onBeforeCompile`)
+- **Ombres anneaux ↔ globe** — Saturne et Uranus projettent l'ombre de leur anneau sur leur globe (intersection rayon/disque), et leur globe projette son ombre sur l'anneau (intersection rayon/sphère)
+- **Atmosphères** — halo doux sur Terre, Vénus, Mars, Uranus, Neptune (fondu vers l'extérieur, sans liseré)
+- **Ceinture d'astéroïdes** — rochers bosselés et lisses (trois formes, teintes variées) en `InstancedMesh`
+- Le code 3D commun aux deux modes vit dans `src/kit.js`, les données dans `src/data.js`
 
 ### Données réelles
 - **8 planètes** avec masse, gravité, période orbitale, durée du jour, température, type
@@ -67,8 +83,8 @@ Palette nommée (`:root` dans `src/style.css`) : `--ink`, `--panel`, `--line`, `
 | [Three.js](https://threejs.org/) | Rendu 3D, WebGL |
 | [Vite](https://vitejs.dev/) | Bundler, dev server |
 | Three.js Addons | EffectComposer, UnrealBloomPass, OutputPass, CSS2DRenderer, OrbitControls |
-| GLSL | Shader soleil (bruit simplex 3D), atmosphères Fresnel |
-| Canvas 2D | Textures procédurales par-pixel |
+| GLSL | Shader soleil (bruit simplex 3D), atmosphères, ombres d'anneaux, nuage primordial en particules |
+| Web Audio | Ambiance sonore du récit, synthétisée (aucun fichier audio) |
 
 ## Installation
 
@@ -104,10 +120,17 @@ Le site est accessible à : `https://loickamg.github.io/Solar-System/`
 solar-system/
 ├── .github/workflows/deploy.yml   # CI/CD GitHub Pages
 ├── public/                         # Favicon, legal.css, pages légales, 404
+│   └── textures/                   # Textures Solar System Scope (CC BY 4.0)
 ├── src/
-│   ├── main.js                     # Point d'entrée : scène, données, textures, UI
-│   └── style.css                   # Styles complets + design tokens
-├── index.html                      # Shell HTML
+│   ├── data.js                     # Données des planètes et du Soleil (partagées)
+│   ├── kit.js                      # Kit 3D partagé : textures, Soleil, planètes, anneaux, ceinture
+│   ├── main.js                     # Mode classique : scène interactive, fiches, comparateur
+│   ├── style.css                   # Styles du mode classique + design tokens
+│   ├── story.js                    # Mode récit : caméra pilotée par le défilement, effets, son
+│   ├── story-content.js            # Texte du récit, chapitre par chapitre
+│   └── story.css                   # Styles du récit
+├── index.html                      # Mode classique
+├── recit.html                      # Mode récit
 ├── package.json
-└── vite.config.js                  # base: '/Solar-System/'
+└── vite.config.js                  # base: '/Solar-System/', deux pages en entrée
 ```
