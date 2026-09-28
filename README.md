@@ -21,6 +21,13 @@ Une visualisation interactive 3D du système solaire, construite avec Three.js e
 - **20 lunes** détaillées (Taille, distance orbitale, teinte, vitesse) — Lune, Phobos, Déimos, Io, Europe, Ganymède, Callisto, Encelade, Dioné, Rhéa, Titan, Japet, Miranda, Ariel, Umbriel, Titania, Obéron, Protée, Triton (rétrograde), Néréide
 - Inclinaisons orbitales et axiales réelles (Uranus à 97.8°)
 
+### Récits (storytelling)
+Chaque planète — et le Soleil lui-même, cliquable depuis son étiquette — a sa fiche
+d'observation enrichie de trois entrées courtes : **origine du nom** (mythologie et
+étymologie), **récit** (un épisode marquant de son exploration ou de sa découverte) et
+**le saviez-vous ?** (un fait qui donne le vertige). De quoi comprendre non seulement les
+chiffres, mais aussi l'histoire humaine et scientifique de chaque monde.
+
 ### Navigation
 - Orbite caméra libre (glisser / molette / clic)
 - **Suivi fluide** — tween easeInOut vers la planète sélectionnée

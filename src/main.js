@@ -23,7 +23,10 @@ const planets = [
     dayLength: '58,6 jours', temperature: '-180 °C à 430 °C',
     period: 0.241, dayH: 1407.6, tilt: 0.03, incl: 7.0,
     moons: [],
-    description: 'Le plus petit monde et le plus proche du Soleil. Sa surface cratérisée connaît des écarts thermiques extrêmes entre le jour et la nuit.'
+    description: 'Le plus petit monde et le plus proche du Soleil. Sa surface cratérisée connaît des écarts thermiques extrêmes entre le jour et la nuit.',
+    myth: 'Mercure porte le nom du messager ailé des dieux romains, aussi rapide dans le ciel que le dieu l’était sur terre : c’est la planète qui boucle son orbite le plus vite, en à peine 88 jours.',
+    story: 'Longtemps crue bloquée en rotation synchrone comme notre Lune, elle n’a révélé sa vraie période de rotation qu’en 1965, grâce à un radar californien — avant d’être cartographiée de près par les sondes Mariner 10 puis MESSENGER.',
+    wow: 'Un jour mercurien (d’un lever de Soleil à l’autre) dure deux années mercuriennes : à cause d’une rotation lente et d’une orbite rapide, le Soleil y semble se lever, reculer un instant, puis se lever à nouveau.',
   },
   {
     id: 'venus', name: 'Vénus', type: 'Tellurique',
@@ -32,7 +35,10 @@ const planets = [
     dayLength: '243 jours', temperature: '462 °C (surface)',
     period: 0.615, dayH: -5832.5, tilt: 177.4, incl: 3.39,
     moons: [],
-    description: 'Une planète jumelle de la Terre par sa taille, mais enveloppée d’une atmosphère dense et brûlante à base de CO₂ qui piège la chaleur.'
+    description: 'Une planète jumelle de la Terre par sa taille, mais enveloppée d’une atmosphère dense et brûlante à base de CO₂ qui piège la chaleur.',
+    myth: 'Vénus doit son nom à la déesse romaine de l’amour et de la beauté, en hommage à l’éclat qui en fait l’astre le plus brillant du ciel nocturne après la Lune.',
+    story: 'En 1982, la sonde soviétique Venera 13 y a posé la première caméra couleur à avoir photographié le sol d’une autre planète — avant d’être écrasée par la chaleur et la pression en un peu plus de deux heures.',
+    wow: 'Vénus tourne sur elle-même à l’envers de presque toutes les autres planètes, si lentement qu’une journée vénusienne dure plus longtemps qu’une année vénusienne.',
   },
   {
     id: 'earth', name: 'Terre', type: 'Tellurique',
@@ -41,7 +47,10 @@ const planets = [
     dayLength: '23 h 56 min', temperature: '15 °C (moyenne)',
     period: 1, dayH: 23.93, tilt: 23.44, incl: 0,
     moons: [{ name: 'Lune', r: 0.27, d: 2.7, c: 0xcfcfcf, s: 1.0 }],
-    description: 'Notre planète océan, seule planète connue à abriter une biosphère riche et diversifiée. Une lune unique et massive stabilise son axe.'
+    description: 'Notre planète océan, seule planète connue à abriter une biosphère riche et diversifiée. Une lune unique et massive stabilise son axe.',
+    myth: 'Seule planète du système à ne pas porter le nom d’une divinité gréco-romaine, la Terre tire le sien d’un vieux mot germanique désignant simplement le sol — celui sur lequel on se tient.',
+    story: 'Vue pour la première fois se lever au-dessus de l’horizon lunaire par l’équipage d’Apollo 8 en 1968, la photo « Lever de Terre » a changé la façon dont l’humanité se percevait : une bille bleue fragile, suspendue dans le noir.',
+    wow: 'La Lune s’éloigne de nous d’environ 3,8 cm par an — à peu près la vitesse à laquelle poussent les ongles.',
   },
   {
     id: 'mars', name: 'Mars', type: 'Tellurique',
@@ -53,7 +62,10 @@ const planets = [
       { name: 'Phobos', r: 0.08, d: 1.8, c: 0xb0a494, s: 2.8 },
       { name: 'Déimos', r: 0.06, d: 2.5, c: 0xa89c8c, s: 2.1 },
     ],
-    description: 'Le désert rouge conserve les traces d’une histoire géologique et hydrologique fascinante. Ses deux lunes sont de petits astéroïdes capturés.'
+    description: 'Le désert rouge conserve les traces d’une histoire géologique et hydrologique fascinante. Ses deux lunes sont de petits astéroïdes capturés.',
+    myth: 'Mars porte le nom du dieu romain de la guerre, sans doute à cause de sa teinte rouge sang : l’oxyde de fer qui recouvre sa surface est la même rouille qui colore le nôtre.',
+    story: 'Depuis 1997, chaque rover posé sur Mars a dépassé la durée de mission prévue — Opportunity, conçu pour tenir 90 jours, a fonctionné pendant près de 15 ans.',
+    wow: 'Mars porte Olympus Mons, le plus grand volcan connu du système solaire : environ trois fois la hauteur de l’Everest, et large comme la France.',
   },
   {
     id: 'jupiter', name: 'Jupiter', type: 'Géante gazeuse',
@@ -67,7 +79,10 @@ const planets = [
       { name: 'Ganymède', r: 0.34, d: 3.05, c: 0xa89a8a, s: 1.3 },
       { name: 'Callisto', r: 0.3, d: 3.7, c: 0x8d8378, s: 1.0 },
     ],
-    description: 'Le géant du système solaire. Ses quatre lunes galiléennes forment un mini-système fascinant. La Grande Tache Rouge est une tempête géante.'
+    description: 'Le géant du système solaire. Ses quatre lunes galiléennes forment un mini-système fascinant. La Grande Tache Rouge est une tempête géante.',
+    myth: 'Jupiter porte le nom du roi des dieux romains, à la mesure de son titre de plus grosse planète du système : on pourrait y loger plus de 1300 Terres.',
+    story: 'En 1610, Galilée y observe quatre points lumineux qui changent de position nuit après nuit : les lunes Io, Europe, Ganymède et Callisto — première preuve que tous les astres ne tournent pas autour de la Terre.',
+    wow: 'La Grande Tache Rouge, une tempête plus large que la Terre entière, est observée sans interruption depuis au moins 1830.',
   },
   {
     id: 'saturn', name: 'Saturne', type: 'Géante gazeuse',
@@ -82,7 +97,10 @@ const planets = [
       { name: 'Titan', r: 0.3, d: 4.1, c: 0xc8a25f, s: 0.95 },
       { name: 'Japet', r: 0.13, d: 4.8, c: 0xb0a898, s: 0.7 },
     ],
-    description: 'Un monde pâle entouré d’anneaux glacés spectaculaires et d’une famille de lunes remarquables. Titan possède une atmosphère dense.'
+    description: 'Un monde pâle entouré d’anneaux glacés spectaculaires et d’une famille de lunes remarquables. Titan possède une atmosphère dense.',
+    myth: 'Saturne, dieu romain du temps et des moissons — et père de Jupiter dans la mythologie —, prête son nom à la planète la plus lente à se déplacer dans le ciel à l’œil nu : 29 ans pour un tour complet.',
+    story: 'La sonde Cassini a passé treize ans en orbite autour de Saturne avant de plonger volontairement dans son atmosphère en 2017, pour ne jamais risquer de contaminer les lunes Encelade ou Titan, jugées propices à la vie.',
+    wow: 'Saturne est si peu dense qu’elle flotterait sur l’eau — s’il existait un océan assez grand pour l’accueillir.',
   },
   {
     id: 'uranus', name: 'Uranus', type: 'Géante de glace',
@@ -97,7 +115,10 @@ const planets = [
       { name: 'Titania', r: 0.15, d: 3.5, c: 0xbcc4c4, s: 0.9 },
       { name: 'Obéron', r: 0.15, d: 4.0, c: 0xb4bec0, s: 0.75 },
     ],
-    description: 'Une géante bleu-vert qui tourne presque sur le côté (inclinaison de 98°), avec un système d’anneaux discrets et une famille de lunes glacées.'
+    description: 'Une géante bleu-vert qui tourne presque sur le côté (inclinaison de 98°), avec un système d’anneaux discrets et une famille de lunes glacées.',
+    myth: 'Seule planète nommée d’après une divinité grecque plutôt que romaine, Uranus (le Ciel primordial) est aussi le seul astre du système dont l’axe est couché : elle roule presque sur le flanc autour du Soleil.',
+    story: 'Découverte par William Herschel en 1781, elle a d’abord été prise pour une comète, puis pour une étoile, avant qu’on ne comprenne qu’il s’agissait d’une planète — la première trouvée au télescope, et non à l’œil nu.',
+    wow: 'À cause de son inclinaison de 98°, chaque pôle d’Uranus connaît 42 années de jour continu, suivies de 42 années de nuit continue.',
   },
   {
     id: 'neptune', name: 'Neptune', type: 'Géante de glace',
@@ -110,9 +131,28 @@ const planets = [
       { name: 'Triton', r: 0.22, d: 2.7, c: 0xd0d8dc, s: -1.2 },
       { name: 'Néréide', r: 0.07, d: 3.6, c: 0xa8a094, s: 0.6 },
     ],
-    description: 'La frontière bleue du système solaire, balayée par des vents supersoniques les plus rapides du système. Triton orbite à rebours.'
+    description: 'La frontière bleue du système solaire, balayée par des vents supersoniques les plus rapides du système. Triton orbite à rebours.',
+    myth: 'Neptune, dieu romain des mers, doit son bleu profond au méthane de son atmosphère, qui absorbe la lumière rouge du Soleil.',
+    story: 'Neptune est la seule planète découverte par le calcul avant d’être vue : en 1846, les perturbations de l’orbite d’Uranus ont permis de prédire sa position, et on l’a trouvée au télescope la nuit même.',
+    wow: 'Une année sur Neptune dure 165 années terrestres : elle n’a bouclé sa première orbite complète depuis sa découverte qu’en 2011.',
   },
 ]
+
+/* Le Soleil n'est pas une planète : pas d'orbite, pas de lune, mais la même
+   fiche d'observation lui est ouverte au clic sur son étiquette — il est,
+   après tout, le personnage principal de toute cette histoire. */
+const sunInfo = {
+  id: 'sun', name: 'Soleil', type: 'Étoile — naine jaune, type G2V',
+  diameter: SUN_DIAMETER, distance: 0, color: 0xffcf7a, accent: '#ffdca0',
+  mass: '1,989 × 10³⁰ kg (99,86 % de la masse du système)', gravity: '274 m/s² (surface)',
+  orbitalPeriod: '≈ 225 millions d’années (autour du centre de la galaxie)',
+  dayLength: '≈ 27 jours (rotation équatoriale)', temperature: '5 500 °C (surface) — 15 000 000 °C (cœur)',
+  moons: [],
+  description: 'Une boule de plasma en fusion permanente, assez massive pour courber l’espace autour d’elle et maintenir huit planètes en orbite depuis 4,6 milliards d’années.',
+  myth: 'Sol, le dieu-Soleil romain, prête son nom à notre étoile — mais c’est le grec hêlios qui a donné « héliocentrique », le mot qui a mis fin à des siècles de certitude que la Terre était le centre de tout.',
+  story: 'En 1919, une éclipse totale a permis à des astronomes britanniques de mesurer comment le Soleil dévie la lumière des étoiles lointaines — confirmant la relativité générale d’Einstein, et le rendant célèbre du jour au lendemain.',
+  wow: 'Le Soleil représente 99,86 % de la masse totale du système solaire : tout le reste — huit planètes, leurs lunes, les astéroïdes — tient dans les 0,14 % restants.',
+}
 
 /* ==========================================================
     TEXTURES PROCÉDURALES HD — bruit de valeur sans couture
@@ -469,7 +509,7 @@ app.innerHTML = `
       <section class="hero"><div><p class="kicker">Observatoire orbital <span></span></p><h1>Voir les mondes<br><em>prendre forme.</em></h1></div><div class="hero-copy"><p>Une maquette interactive pour comprendre les proportions, les distances et les familles de notre voisinage cosmique.</p><small>Modèle pédagogique · dimensions et distances compressées pour rester lisibles</small></div></section>
       <section class="workspace">
         <div class="scene-card"><div class="scene-head"><div><label>01 / Navigation spatiale</label><h2>Carte 3D du système solaire</h2></div><div class="scene-tools"><button id="view-system" class="tool-button active" type="button">Système</button><button id="view-selected" class="tool-button" type="button">Suivre la sélection</button></div></div><div id="scene" class="scene"><div id="scene-loader" class="scene-loader"><span class="loader-mark"></span><span class="loader-text">Initialisation du moteur 3D…</span></div><div class="scene-overlay"><span class="axis">Y ↑</span><span class="hint">Glisser pour orbiter · molette pour zoomer · clic sur une planète pour la suivre</span></div></div><div class="scene-foot"><button id="pause" class="primary-button" type="button">Ⅱ <span>Pause</span></button><label class="range-label">Vitesse <input id="speed" type="range" min="0" max="2" step="0.1" value="0.6"><b id="speed-value">0,6×</b></label><button id="toggle-moons" class="link-button" type="button">Masquer lunes</button><button id="toggle-labels" class="link-button" type="button">Masquer étiquettes</button><button id="reset-camera" class="link-button" type="button">Réinitialiser la vue</button></div></div>
-        <aside class="inspector"><label>02 / Fiche d’observation</label><div id="swatch" class="swatch"></div><p id="type" class="planet-type">Tellurique</p><h2 id="name">Terre</h2><p id="description" class="description"></p><div class="facts facts-grid"><div><small>Diamètre équatorial</small><strong id="diameter"></strong></div><div><small>Distance moyenne</small><strong id="distance"></strong></div><div><small>Masse</small><strong id="mass"></strong></div><div><small>Gravité de surface</small><strong id="gravity"></strong></div><div><small>Période orbitale</small><strong id="orbitalPeriod"></strong></div><div><small>Durée du jour</small><strong id="dayLength"></strong></div><div><small>Température moy.</small><strong id="temperature"></strong></div><div><small>Comparée à la Terre</small><strong id="earth-ratio"></strong></div></div><div class="moons"><small>Lunes principales <b id="moon-count">—</b></small><div id="moon-list"></div></div><div class="record"><span></span><code id="record-id">EARTH / TERRE</code></div></aside>
+        <aside class="inspector"><label>02 / Fiche d’observation</label><div id="swatch" class="swatch"></div><p id="type" class="planet-type">Tellurique</p><h2 id="name">Terre</h2><p id="description" class="description"></p><div class="lore"><p class="lore-entry"><small>Origine du nom</small><span id="myth"></span></p><p class="lore-entry"><small>Récit</small><span id="story"></span></p><p class="lore-entry lore-wow"><small>Le saviez-vous ?</small><span id="wow"></span></p></div><div class="facts facts-grid"><div><small>Diamètre équatorial</small><strong id="diameter"></strong></div><div><small>Distance moyenne</small><strong id="distance"></strong></div><div><small>Masse</small><strong id="mass"></strong></div><div><small>Gravité de surface</small><strong id="gravity"></strong></div><div><small>Période orbitale</small><strong id="orbitalPeriod"></strong></div><div><small>Durée du jour</small><strong id="dayLength"></strong></div><div><small>Température moy.</small><strong id="temperature"></strong></div><div><small>Comparée à la Terre</small><strong id="earth-ratio"></strong></div></div><div class="moons"><small>Lunes principales <b id="moon-count">—</b></small><div id="moon-list"></div></div><div class="record"><span></span><code id="record-id">EARTH / TERRE</code></div></aside>
       </section>
       <section class="comparison"><div class="section-head"><div><label>03 / Comparateur pédagogique</label><h2>Les proportions, autrement.</h2></div><div class="compare-switch"><button data-mode="size" class="compare-button active" type="button">Taille</button><button data-mode="distance" class="compare-button" type="button">Distance</button><button data-mode="sun-size" class="compare-button" type="button">Taille vs Soleil</button><button data-mode="sun-dist" class="compare-button" type="button">Distance Soleil</button></div></div><p class="comparison-intro">Les valeurs réelles sont conservées dans les fiches. Les barres utilisent une échelle logarithmique pour rendre visibles les écarts entre les corps célestes.</p><div id="bars" class="bars"></div><div id="sun-compare" class="sun-compare hidden"><div class="sun-visual"><div class="sun-circle"></div><div class="sun-label">Soleil <small>1 392 700 km</small></div></div><div class="planet-vs"><div id="vs-planet" class="vs-planet-circle"></div><div id="vs-planet-name" class="vs-planet-name"></div></div></div></section>
     </main>
@@ -749,7 +789,9 @@ function makeLabel(text, color) {
   div.innerHTML = `<i style="background:${color}"></i><span>${text}</span>`
   return div
 }
-const sunLabel = new CSS2DObject(makeLabel('Soleil', '#ffbd58'))
+const sunLabelDiv = makeLabel('Soleil', '#ffbd58')
+sunLabelDiv.addEventListener('click', (e) => { e.stopPropagation(); selectPlanet(sunInfo) })
+const sunLabel = new CSS2DObject(sunLabelDiv)
 sunLabel.position.set(0, 3.5, 0)
 scene.add(sunLabel)
 
@@ -909,13 +951,16 @@ renderer.domElement.addEventListener('pointermove', (e) => {
    ========================================================== */
 function selectPlanet(planet, skipFocus = false) {
   selected = planet
-  vsSunPlanet = planet
+  if (planet.id !== 'sun') vsSunPlanet = planet
   const hex = `#${planet.color.toString(16).padStart(6, '0')}`
   document.querySelector('#swatch').style.setProperty('--planet', hex)
   document.querySelector('#swatch').style.setProperty('--accent', planet.accent)
   document.querySelector('#type').textContent = planet.type
   document.querySelector('#name').textContent = planet.name
   document.querySelector('#description').textContent = planet.description
+  document.querySelector('#myth').textContent = planet.myth || ''
+  document.querySelector('#story').textContent = planet.story || ''
+  document.querySelector('#wow').textContent = planet.wow || ''
   document.querySelector('#diameter').textContent = `${planet.diameter.toLocaleString('fr-FR')} km`
   document.querySelector('#distance').textContent = `${planet.distance.toLocaleString('fr-FR')} UA`
   document.querySelector('#mass').textContent = planet.mass
@@ -938,6 +983,7 @@ function selectPlanet(planet, skipFocus = false) {
     selRing.visible = true
   }
   Object.entries(labelEls).forEach(([id, el]) => el.classList.toggle('active', id === planet.id))
+  sunLabelDiv.classList.toggle('active', planet.id === 'sun')
   renderBars()
   renderSunCompare()
   if (!skipFocus) startFollow(planet)
